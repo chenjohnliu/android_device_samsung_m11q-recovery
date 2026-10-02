@@ -14,10 +14,10 @@
 
 LOCAL_PATH := device/samsung/m11q
 
-# Inherit from those products, Most specific first.
+# Inherit from those products, most specific first.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
 $(call inherit-product, $(LOCAL_PATH)/device.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/product_launched_with_o_mr1.mk)
 
 # Inherit common twrp phone.
 $(call inherit-product, vendor/twrp/config/common.mk)
@@ -27,4 +27,5 @@ PRODUCT_NAME := twrp_m11q
 PRODUCT_DEVICE := m11q
 PRODUCT_BRAND := samsung
 PRODUCT_MANUFACTURER := samsung
+PRODUCT_MODEL := SM-M115F
 PRODUCT_GMS_CLIENTID_BASE := android-samsung
