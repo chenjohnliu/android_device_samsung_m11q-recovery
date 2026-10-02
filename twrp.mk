@@ -35,9 +35,10 @@ TW_NO_BIND_SYSTEM := true
 TW_SCREEN_BLANK_ON_BOOT := true
 
 # Crypto
-TW_INCLUDE_CRYPTO := false
-TW_INCLUDE_CRYPTO_FBE := false
-TW_INCLUDE_FBE_METADATA_DECRYPT := true
+TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_CRYPTO_FBE := true
+TW_USE_FSCRYPT_POLICY := 1
+BOARD_USES_QCOM_FBE_DECRYPTION := true
 BOARD_USES_METADATA_PARTITION := true
 
 PRODUCT_COPY_FILES += $(call find-copy-subdir-files,*,device/samsung/m11q/recovery/root,recovery/root)
