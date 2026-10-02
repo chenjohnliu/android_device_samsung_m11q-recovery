@@ -26,6 +26,7 @@
 #
 
 import /init.recovery.qcom_decrypt.rc
+import /init.recovery.debuggerd.rc
 
 on init
     setprop prepdecrypt.loglevel 2
