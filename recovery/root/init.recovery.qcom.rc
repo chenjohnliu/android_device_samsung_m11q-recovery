@@ -30,6 +30,7 @@ import /init.recovery.debuggerd.rc
 
 on init
     setprop prepdecrypt.loglevel 2
+    setprop prepdecrypt.setpatch true
 
 on boot
     setprop ro.boot.vbmeta.avb_version 1.1
