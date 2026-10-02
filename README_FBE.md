@@ -51,8 +51,10 @@ system/vendor security patch levels before Keymaster starts.
 A complete recovery flash/readback and fresh recovery reboot validated
 systemwide/DE/CE decryption and readable internal storage on the current
 crDroid 13 installation with default/no-lockscreen authentication.
-PIN/password/pattern configurations are not yet tested. The historical
-qseecomd SIGSEGV did not recur; its original root cause is unknown.
+On 2026-10-03 the user reported successful decryption with pattern, PIN
+and password authentication. These are user-tested results; no new runtime
+logs or exact test-image hash were supplied. The historical qseecomd SIGSEGV
+did not recur; its original root cause is unknown.
 
 The FBE image tested on the phone has SHA-256
 `d4ba6989166189c5866c320e4996a53d438b739d1a1642aa3eaf77ba18e5f380`.
@@ -76,3 +78,16 @@ Changing mode requires manual **Format Data**, which erases internal
 storage, followed by reboot to Recovery before System. A factory reset is
 insufficient. Do not execute these switches as a test of real FBE unlock.
 Only these two Essentials entries were restored from the old recovery.
+
+## quokka display name (2026-10-03)
+
+`TW_DEVICE_VERSION := quokka` changes the recovery version displayed on
+the splash/header to `3.7.1_12-quokka`. The name change is a separate commit
+from this validation documentation. Recovery filesystem/crypto settings and
+the exact Essentials ZIP bytes are unchanged.
+
+New image: `recovery-quokka-fbe-20261003.img`, 64 MiB, SHA-256
+`9c9ca25fb81b6a514c226483fa336d685e4df4e895fb0f14e8c1550d5b4f3094`.
+Packed recovery and command binaries both contain the new version string.
+FBE inputs, Essentials routes/ZIP hashes, all 58 custom ELF hashes and AVB
+checks pass. This new image has not been flashed or runtime tested.
