@@ -18,6 +18,9 @@ LOCAL_PATH := device/samsung/m11q
 
 BUILD_BROKEN_DUP_RULES := true
 
+# This recovery tree packages vendor ELF files directly into the ramdisk.
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+
 # CPU
 TARGET_ARCH := arm64
 TARGET_CPU_ABI := arm64-v8a
