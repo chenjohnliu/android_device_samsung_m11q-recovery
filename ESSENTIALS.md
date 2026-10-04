@@ -2,13 +2,13 @@
 
 適用 Samsung Galaxy M11（m11q）。從 Advanced → Essentials 進入。備份使用 Select Storage 選定的目的地，可使用 Micro SD 或 USB OTG；存放於 `TWRP/Essentials/<裝置序號>/<操作與時間>/`，附校驗資訊。寫入操作需滑動確認；工具不會自動重開機或格式化。
 
-本分支的下一版候選新增備份選擇，尚未取代已發布的 20261004 IMG／TAR。Prepare AVB、Keep TWRP 和 Magisk 每次可選 **Back up first** 或 **Skip backup**；略過備份後仍需 **Swipe without Backup**。沒有可用儲存空間時可選 Skip backup，不需 SD／OTG。這只略過本工具的持久備份，不略過裝置、解鎖狀態、映像驗證或寫入核對。記憶體中的原始 boot／vbmeta 只能供當次失敗立即回復，重開後沒有已存副本；必要時須以匹配的原廠韌體恢復。Keep TWRP 仍將還原檔案改名保留於原分割區，不刪除。其他備份、匯出與還原功能仍使用所選儲存空間。
+20261004-r2 新增備份選擇，已通過使用者實機測試。Prepare AVB、Keep TWRP 和 Magisk 每次可選 **Back up first** 或 **Skip backup**；略過備份後仍需 **Swipe without Backup**。沒有可用儲存空間時可選 Skip backup，不需 SD／OTG。這只略過本工具的持久備份，不略過裝置、解鎖狀態、映像驗證或寫入核對。記憶體中的原始 boot／vbmeta 只能供當次失敗立即回復，重開後沒有已存副本；必要時須以匹配的原廠韌體恢復。Keep TWRP 仍將還原檔案改名保留於原分割區，不刪除。其他備份、匯出與還原功能仍使用所選儲存空間。
 
 | 選單 | 功能 |
 | --- | --- |
 | Disable FBE／Enable FBE | 不支援 stock ROM。僅在相容的 custom ROM 切換資料加密設定；需要自行備份資料並手動 Format Data，與解密既有 Data 不同。 |
-| Keep TWRP | 尋找 stock recovery 還原檔案，先備份再改名停用。修改 ROM 檔案前要求 hashtree 已停用。找不到檔案會明確回報；不解除 KG。 |
-| Magisk 30.7 | 使用固定官方穩定版，先備份當前 boot，再安裝至有 ramdisk 的 boot。保留資料加密與 verity 設定。 |
+| Keep TWRP | 尋找 stock recovery 還原檔案，可選先備份，再改名停用。修改 ROM 檔案前要求 hashtree 已停用。找不到檔案會明確回報；不解除 KG。 |
+| Magisk 30.7 | 使用固定官方穩定版，可選先備份當前 boot，再安裝至有 ramdisk 的 boot。保留資料加密與 verity 設定。 |
 | Android SELinux | 調整 Android boot 的 Enforcing／Permissive 參數；Restore Setting 撤回本工具的參數修改。每次保留 boot 備份。 |
 | Mount RW | 在目前 recovery 工作階段掛載 system、vendor、product、odm 為可寫；確認實際結果，失敗不會假報成功。 |
 | Root Modules | 列出或停用單個／全部模組，保存原狀態。Choose Module 選 module.prop；Restore States 選 modules.state。需要 Data 已解密可寫；不支援的 root 注入方式會拒絕操作。 |
@@ -19,9 +19,9 @@
 ## Stock ROM：保留 TWRP
 
 1. 用 Odin AP 刷入 TAR 時關閉 Auto Reboot，完成後直接進 TWRP，先不要啟動 Android。
-2. Advanced → Essentials → Select Storage 選 Micro SD 或 USB OTG 存備份。下一版候選若沒有可用儲存空間，可在操作前明確選 Skip backup。
-3. Boot / AVB → AVB / DM-Verity → Status 確認狀態；若驗證仍啟用，執行 Prepare AVB，滑動確認並等待 boot／vbmeta 備份及寫入核對完成。
-4. 回 Essentials 執行 Keep TWRP，確認日誌顯示已備份並停用 stock recovery 還原檔案。
+2. Advanced → Essentials → Select Storage 選 Micro SD 或 USB OTG 存備份。沒有可用儲存空間時，可在每個操作前明確選 Skip backup。
+3. Boot / AVB → AVB / DM-Verity → Status 確認狀態；若驗證仍啟用，執行 Prepare AVB，選 Back up first 或 Skip backup，再滑動確認並等待寫入核對完成；選備份時會先保存 boot／vbmeta。
+4. 回 Essentials 執行 Keep TWRP，選備份方式並滑動確認，確認日誌顯示已停用 stock recovery 還原檔案。
 5. 重開 System，再回 Recovery 確認 quokka TWRP 仍保留。
 
 bootloader 必須已解鎖；Prepare AVB 是獨立確認的操作。Magisk 安裝與保留 recovery 是不同功能。
@@ -34,17 +34,17 @@ bootloader 必須已解鎖；Prepare AVB 是獨立確認的操作。Magisk 安�
 
 ## AVB / DM-Verity
 
-Status 唯讀顯示當前 vbmeta 驗證旗標。Prepare AVB 先備份當前 vbmeta 和 boot，再停用現有 vbmeta 的 verification／hashtree 旗標；保留其他內容和資料加密，寫入後完整讀回核對，失敗嘗試回復原內容。
+Status 唯讀顯示當前 vbmeta 驗證旗標。Prepare AVB 可選先備份當前 vbmeta 和 boot，再停用現有 vbmeta 的 verification／hashtree 旗標；保留其他內容和資料加密，寫入後完整讀回核對，失敗嘗試回復原內容。
 
 需要 bootloader 已解鎖。orange 是解鎖狀態；部分 firmware 不提供其他解鎖屬性，工具接受缺省值，但拒絕明確鎖定、未知或矛盾的狀態。
 
-旗標修改會使原始 vbmeta 簽章不再匹配。備份包含 `vbmeta-original.img`、`vbmeta-disabled.img`、`boot.img`、校驗值與還原說明。修改 boot／ROM 後，不應只還原原始 vbmeta 重新啟用驗證；回復 verified stock 應使用完整、匹配的原廠 firmware。
+旗標修改會使原始 vbmeta 簽章不再匹配。選 Back up first 時，備份包含 `vbmeta-original.img`、`vbmeta-disabled.img`、`boot.img`、校驗值與還原說明。修改 boot／ROM 後，不應只還原原始 vbmeta 重新啟用驗證；回復 verified stock 應使用完整、匹配的原廠 firmware。
 
 AVB 驗證與 FBE 加密是不同功能。沒有必要為了解除 AVB 檢查先 Disable FBE 或清空 Data。
 
 ## Magisk
 
-新版整合固定官方 30.7 APK，保留原始簽署位元組；獨立安裝 wrapper 限定 boot 目標，避免舊設定導向 recovery／vendor_boot。先選 Micro SD 作備份儲存空間，再執行 Magisk 30.7。完成後自行重開 Android，確認 Magisk 版本及 root 權限。
+新版整合固定官方 30.7 APK，保留原始簽署位元組；獨立安裝 wrapper 限定 boot 目標，避免舊設定導向 recovery／vendor_boot。執行 Magisk 30.7 時選備份方式；要備份時先選可寫儲存空間，也可明確略過備份。完成後自行重開 Android，確認 Magisk 版本及 root 權限。
 
 使用者已確認從 Magisk App 升級至 30.7 可用，並完成移除後從本版本 recovery 重新安裝 30.7 的測試。已安裝的 Magisk可繼續從 App 升級。
 
