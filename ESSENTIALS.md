@@ -1,6 +1,8 @@
 # quokka Essentials 使用說明
 
-適用 Samsung Galaxy M11（m11q）。從 Advanced → Essentials 進入。先用 Select Storage 選備份目的地，建議使用 Micro SD。備份存放於 `TWRP/Essentials/<裝置序號>/<操作與時間>/`，附校驗資訊。寫入操作需滑動確認；工具不會自動重開機或格式化。
+適用 Samsung Galaxy M11（m11q）。從 Advanced → Essentials 進入。備份使用 Select Storage 選定的目的地，可使用 Micro SD 或 USB OTG；存放於 `TWRP/Essentials/<裝置序號>/<操作與時間>/`，附校驗資訊。寫入操作需滑動確認；工具不會自動重開機或格式化。
+
+本分支的下一版候選新增備份選擇，尚未取代已發布的 20261004 IMG／TAR。Prepare AVB、Keep TWRP 和 Magisk 每次可選 **Back up first** 或 **Skip backup**；略過備份後仍需 **Swipe without Backup**。沒有可用儲存空間時可選 Skip backup，不需 SD／OTG。這只略過本工具的持久備份，不略過裝置、解鎖狀態、映像驗證或寫入核對。記憶體中的原始 boot／vbmeta 只能供當次失敗立即回復，重開後沒有已存副本；必要時須以匹配的原廠韌體恢復。Keep TWRP 仍將還原檔案改名保留於原分割區，不刪除。其他備份、匯出與還原功能仍使用所選儲存空間。
 
 | 選單 | 功能 |
 | --- | --- |
@@ -17,7 +19,7 @@
 ## Stock ROM：保留 TWRP
 
 1. 用 Odin AP 刷入 TAR 時關閉 Auto Reboot，完成後直接進 TWRP，先不要啟動 Android。
-2. Advanced → Essentials → Select Storage 選 Micro SD 存備份。
+2. Advanced → Essentials → Select Storage 選 Micro SD 或 USB OTG 存備份。下一版候選若沒有可用儲存空間，可在操作前明確選 Skip backup。
 3. Boot / AVB → AVB / DM-Verity → Status 確認狀態；若驗證仍啟用，執行 Prepare AVB，滑動確認並等待 boot／vbmeta 備份及寫入核對完成。
 4. 回 Essentials 執行 Keep TWRP，確認日誌顯示已備份並停用 stock recovery 還原檔案。
 5. 重開 System，再回 Recovery 確認 quokka TWRP 仍保留。
