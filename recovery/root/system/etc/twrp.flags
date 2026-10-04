@@ -53,3 +53,10 @@ odm                  /odm            ext4                   wait,avb,logical,fir
 # Removable Storage
 /external_sd      vfat      /dev/block/mmcblk1p1    /dev/block/mmcblk1         flags=removable;storage;display="External SD Card";wipeingui
 /usb-otg          vfat      /dev/block/sda1         /dev/block/sda             flags=removable;storage;display="USB OTG";wipeingui
+
+# m11q image install targets (live logical mappings; no automatic resize)
+/system_image emmc /dev/block/bootdevice/by-name/system flags=backup=0;flashimg;display="System Image"
+/vendor_image emmc /dev/block/bootdevice/by-name/vendor flags=backup=0;flashimg;display="Vendor Image"
+/product_image emmc /dev/block/bootdevice/by-name/product flags=backup=0;flashimg;display="Product Image"
+/odm_image emmc /dev/block/bootdevice/by-name/odm flags=backup=0;flashimg;display="ODM Image"
+/dtbo emmc /dev/block/bootdevice/by-name/dtbo flags=backup=0;flashimg;display="DTBO"
