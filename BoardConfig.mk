@@ -144,5 +144,7 @@ TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
 
 # filesystem
+# Package make_f2fs/fsck.f2fs for recovery formatting and repair.
+TARGET_USERIMAGES_USE_F2FS := true
 TARGET_USES_MKE2FS:=true
 include $(LOCAL_PATH)/twrp.mk
