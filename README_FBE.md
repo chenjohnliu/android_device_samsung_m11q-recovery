@@ -1,6 +1,6 @@
 # TWRP 3.7.1_12-quokka for Samsung Galaxy M11
 
-Device: m11q / SM-M115F. Includes actual FBE decryption for fileencryption=ice,
+Device: m11q / SM-M115F. Includes FBE decryption for fileencryption=ice on tested custom-ROM configurations,
 Advanced > Essentials and additional Install Image targets.
 
 The 2026-10-04 release preserves the exact user-tested recovery bytes. Download
@@ -41,9 +41,20 @@ that backs up the current boot/vbmeta and changes only current verification flag
 Enable/Disable FBE switches require a manual Format Data and are independent
 of recovery's normal FBE decryption.
 
+## Stock ROM and FBE support
+
+Stock ROM decryption is not supported. Enable FBE / Disable FBE are not supported
+on stock ROM. Successful pattern/PIN/password decryption tests apply to the tested
+custom-ROM configurations.
+
+On stock, use Micro SD backups, Prepare AVB when verification is enabled, then
+Keep TWRP before booting Android. Check recovery persistence after reboot.
+See [release notes](RELEASE_NOTES-20261004.md) and [the guide](ESSENTIALS.md)
+for the full sequence. This workflow does not require Disable FBE or Format Data.
+
 ## Validation
 
-User confirmed pattern, PIN and password decryption, Odin installation,
+User confirmed pattern, PIN and password decryption on tested custom ROMs, Odin installation,
 Android Enforcing/Permissive, stock recovery persistence and Magisk 30.7
 reinstallation from recovery. The latest image's crypto bytes match the
 previously validated inputs. Other tools and image-write targets still have

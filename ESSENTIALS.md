@@ -4,7 +4,7 @@
 
 | 選單 | 功能 |
 | --- | --- |
-| Disable FBE／Enable FBE | 切換 ROM 的資料加密設定。需要自行備份資料並手動 Format Data；與 recovery 解密既有 Data 的功能不同。 |
+| Disable FBE／Enable FBE | 不支援 stock ROM。僅在相容的 custom ROM 切換資料加密設定；需要自行備份資料並手動 Format Data，與解密既有 Data 不同。 |
 | Keep TWRP | 尋找 stock recovery 還原檔案，先備份再改名停用。修改 ROM 檔案前要求 hashtree 已停用。找不到檔案會明確回報；不解除 KG。 |
 | Magisk 30.7 | 使用固定官方穩定版，先備份當前 boot，再安裝至有 ramdisk 的 boot。保留資料加密與 verity 設定。 |
 | Android SELinux | 調整 Android boot 的 Enforcing／Permissive 參數；Restore Setting 撤回本工具的參數修改。每次保留 boot 備份。 |
@@ -13,6 +13,22 @@
 | Boot / AVB | 備份／還原 boot，並提供 AVB / DM-Verity 子選單。還原前檢查格式、校驗值和 ROM fingerprint，再備份當前 boot。 |
 | Backup EFS | 備份 sec_efs 原始映像。efs 是另一個分割區，此快捷工具不備份它。 |
 | Diagnostics | 匯出 recovery 版本、SELinux、crypto 服務、boot 參數、掛載及日誌。 |
+
+## Stock ROM：保留 TWRP
+
+1. 用 Odin AP 刷入 TAR 時關閉 Auto Reboot，完成後直接進 TWRP，先不要啟動 Android。
+2. Advanced → Essentials → Select Storage 選 Micro SD 存備份。
+3. Boot / AVB → AVB / DM-Verity → Status 確認狀態；若驗證仍啟用，執行 Prepare AVB，滑動確認並等待 boot／vbmeta 備份及寫入核對完成。
+4. 回 Essentials 執行 Keep TWRP，確認日誌顯示已備份並停用 stock recovery 還原檔案。
+5. 重開 System，再回 Recovery 確認 quokka TWRP 仍保留。
+
+bootloader 必須已解鎖；Prepare AVB 是獨立確認的操作。Magisk 安裝與保留 recovery 是不同功能。
+
+## FBE 支援範圍
+
+**本 recovery 不支援 stock ROM 解密。Enable FBE／Disable FBE 也不支援 stock ROM。** 已確認的圖案／PIN／密碼解密測試限於已測 custom ROM。
+
+在相容 ROM 切換加密設定，需要手動 Format Data，會清除內部儲存空間。Prepare AVB 保留 Data 加密、不格式化，也不會讓 stock ROM 解密變成可用。stock 的 Keep TWRP 流程不需要 Disable FBE 或 Format Data。
 
 ## AVB / DM-Verity
 

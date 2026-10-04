@@ -365,8 +365,9 @@
   "validation": {
     "magisk_30_7_recovery_reinstall": "user confirmed 2026-10-04",
     "keep_twrp_reboot_persistence": "user confirmed 2026-10-04",
-    "fbe_credentials": "pattern, PIN and password previously user-confirmed; crypto input bytes unchanged",
+    "fbe_credentials": "pattern, PIN and password previously confirmed on tested custom-ROM configurations; crypto bytes unchanged; stock ROM decryption unsupported",
     "static": "packed ELF/FBE/pins/UI/image targets/AVB/dynamic symbols passed",
-    "additional_tools": "not all tools or image-write targets have device validation"
+    "additional_tools": "not all tools or image-write targets have device validation",
+    "stock_fbe_switches": "Enable FBE / Disable FBE are not supported on stock ROM"
   }
 }
