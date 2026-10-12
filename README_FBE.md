@@ -1,5 +1,7 @@
 # TWRP 3.7.1_12-quokka for Samsung Galaxy M11
 
+Main documentation: [README.md](README.md). Essentials guides: [English](ESSENTIALS.md) / [Traditional Chinese](ESSENTIALS.zh-TW.md).
+
 Device: m11q / SM-M115F. Includes FBE decryption for fileencryption=ice on tested custom-ROM configurations,
 Advanced > Essentials and additional Install Image targets.
 

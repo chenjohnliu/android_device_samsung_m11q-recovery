@@ -1,73 +1,79 @@
-# quokka Essentials 使用說明
+# quokka Essentials Guide
 
-適用 Samsung Galaxy M11（m11q）。從 Advanced → Essentials 進入。備份使用 Select Storage 選定的目的地，可使用 Micro SD 或 USB OTG；存放於 `TWRP/Essentials/<裝置序號>/<操作與時間>/`，附校驗資訊。寫入操作需滑動確認；工具不會自動重開機或格式化。
+English | [Traditional Chinese](ESSENTIALS.zh-TW.md)
 
-20261004-r2 新增備份選擇，已通過使用者實機測試。Prepare AVB、Keep TWRP 和 Magisk 每次可選 **Back up first** 或 **Skip backup**；略過備份後仍需 **Swipe without Backup**。沒有可用儲存空間時可選 Skip backup，不需 SD／OTG。這只略過本工具的持久備份，不略過裝置、解鎖狀態、映像驗證或寫入核對。記憶體中的原始 boot／vbmeta 只能供當次失敗立即回復，重開後沒有已存副本；必要時須以匹配的原廠韌體恢復。Keep TWRP 仍將還原檔案改名保留於原分割區，不刪除。其他備份、匯出與還原功能仍使用所選儲存空間。
+For the Samsung Galaxy M11 (`m11q`). Open **Advanced > Essentials**. Backups use the destination chosen in **Select Storage**, such as Micro SD or USB OTG. They are saved under `TWRP/Essentials/<device-serial>/<operation-and-time>/` with verification information. Write operations require swipe confirmation. These tools do not automatically reboot or format the device.
 
-| 選單 | 功能 |
+Release **20261004-r2** adds backup choices and has passed user device testing. **Prepare AVB**, **Keep TWRP**, and **Magisk** each offer **Back up first** or **Skip backup**. Skipping a backup still requires **Swipe without Backup**. If no writable storage is available, Skip backup works without SD or OTG.
+
+Skip backup omits this tool's persistent backup. Device, bootloader, image, and write verification checks remain enabled. Original boot/vbmeta bytes held in memory can only support immediate rollback during the operation; there is no saved copy after reboot. Matching stock firmware may be needed for recovery. Keep TWRP retains the restore files by renaming them on their original partition rather than deleting them. Other backup, export, and restore tools still use the selected storage.
+
+## Tools
+
+| Menu | Function |
 | --- | --- |
-| Disable FBE／Enable FBE | 不支援 stock ROM。僅在相容的 custom ROM 切換資料加密設定；需要自行備份資料並手動 Format Data，與解密既有 Data 不同。 |
-| Keep TWRP | 尋找 stock recovery 還原檔案，可選先備份，再改名停用。修改 ROM 檔案前要求 hashtree 已停用。找不到檔案會明確回報；不解除 KG。 |
-| Magisk 30.7 | 使用固定官方穩定版，可選先備份當前 boot，再安裝至有 ramdisk 的 boot。保留資料加密與 verity 設定。 |
-| Android SELinux | 調整 Android boot 的 Enforcing／Permissive 參數；Restore Setting 撤回本工具的參數修改。每次保留 boot 備份。 |
-| Mount RW | 在目前 recovery 工作階段掛載 system、vendor、product、odm 為可寫；確認實際結果，失敗不會假報成功。 |
-| Root Modules | 列出或停用單個／全部模組，保存原狀態。Choose Module 選 module.prop；Restore States 選 modules.state。需要 Data 已解密可寫；不支援的 root 注入方式會拒絕操作。 |
-| Boot / AVB | 備份／還原 boot，並提供 AVB / DM-Verity 子選單。還原前檢查格式、校驗值和 ROM fingerprint，再備份當前 boot。 |
-| Backup EFS | 備份 sec_efs 原始映像。efs 是另一個分割區，此快捷工具不備份它。 |
-| Diagnostics | 匯出 recovery 版本、SELinux、crypto 服務、boot 參數、掛載及日誌。 |
+| Disable FBE / Enable FBE | **Not supported on stock ROM.** Changes the encryption configuration only on compatible custom ROMs. Back up your data and manually Format Data when switching modes. This does not decrypt existing data. |
+| Keep TWRP | Finds stock recovery restore files, optionally backs them up, and disables them by renaming them. Hashtree verification must be disabled before ROM file changes. Reports when no supported files are found; it does not unlock KG. |
+| Magisk 30.7 | Uses the bundled official stable version. Optionally backs up the current boot image, then installs into boot with a supported ramdisk. Preserves data encryption and verity settings. |
+| Android SELinux | Changes Android boot parameters for Enforcing / Permissive. Restore Setting reverses the parameters changed by this tool. Each operation retains a boot backup. |
+| Mount RW | Mounts system, vendor, product, and odm as writable for the current recovery session. Checks the actual result and reports failures. |
+| Root Modules | Lists or disables one/all modules and saves their previous state. Choose Module selects `module.prop`; Restore States selects `modules.state`. Requires decrypted, writable Data. Unsupported root injection methods are rejected. |
+| Boot / AVB | Backs up/restores boot and provides the AVB / DM-Verity submenu. Before restoring, validates the format, checksum, and ROM fingerprint, then backs up the current boot image. |
+| Backup EFS | Backs up the raw `sec_efs` image. `efs` is a separate partition and is not included in this shortcut. |
+| Diagnostics | Exports the recovery version, SELinux state, crypto services, boot parameters, mounts, and logs. |
 
-## Stock ROM：保留 TWRP
+## Stock ROM: keep TWRP after reboot
 
-1. 用 Odin AP 刷入 TAR 時關閉 Auto Reboot，完成後直接進 TWRP，先不要啟動 Android。
-2. Advanced → Essentials → Select Storage 選 Micro SD 或 USB OTG 存備份。沒有可用儲存空間時，可在每個操作前明確選 Skip backup。
-3. Boot / AVB → AVB / DM-Verity → Status 確認狀態；若驗證仍啟用，執行 Prepare AVB，選 Back up first 或 Skip backup，再滑動確認並等待寫入核對完成；選備份時會先保存 boot／vbmeta。
-4. 回 Essentials 執行 Keep TWRP，選備份方式並滑動確認，確認日誌顯示已停用 stock recovery 還原檔案。
-5. 重開 System，再回 Recovery 確認 quokka TWRP 仍保留。
+1. Flash the TAR in Odin **AP** with **Auto Reboot disabled**. Boot directly into TWRP afterward; do not start Android yet.
+2. Open **Advanced > Essentials > Select Storage** and choose Micro SD or USB OTG for backups. If writable storage is unavailable, explicitly choose **Skip backup** for each supported operation.
+3. Open **Boot / AVB > AVB / DM-Verity > Status**. If verification is enabled, run **Prepare AVB**, select **Back up first** or **Skip backup**, then swipe to confirm and wait for write verification. Back up first saves boot/vbmeta before changes.
+4. Return to Essentials and run **Keep TWRP**. Choose the backup option, swipe to confirm, and check that the log reports disabling the stock recovery restore files.
+5. Reboot to System, then return to Recovery and confirm quokka TWRP is still present.
 
-bootloader 必須已解鎖；Prepare AVB 是獨立確認的操作。Magisk 安裝與保留 recovery 是不同功能。
+The bootloader must already be unlocked. Prepare AVB is a separate, explicitly confirmed operation. Installing Magisk and keeping recovery are separate functions.
 
-## FBE 支援範圍
+## FBE support
 
-**本 recovery 不支援 stock ROM 解密。Enable FBE／Disable FBE 也不支援 stock ROM。** 已確認的圖案／PIN／密碼解密測試限於已測 custom ROM。
+**This recovery does not support stock ROM decryption. Enable FBE / Disable FBE are also not supported on stock ROM.** Confirmed pattern/PIN/password decryption tests apply only to the tested custom-ROM configurations.
 
-在相容 ROM 切換加密設定，需要手動 Format Data，會清除內部儲存空間。Prepare AVB 保留 Data 加密、不格式化，也不會讓 stock ROM 解密變成可用。stock 的 Keep TWRP 流程不需要 Disable FBE 或 Format Data。
+Switching the encryption configuration on a compatible ROM requires manual **Format Data**, which erases internal storage. Prepare AVB preserves Data encryption and does not format Data. It does not enable stock ROM decryption. The stock Keep TWRP workflow does not require Disable FBE or Format Data.
 
 ## AVB / DM-Verity
 
-Status 唯讀顯示當前 vbmeta 驗證旗標。Prepare AVB 可選先備份當前 vbmeta 和 boot，再停用現有 vbmeta 的 verification／hashtree 旗標；保留其他內容和資料加密，寫入後完整讀回核對，失敗嘗試回復原內容。
+**Status** reads the current vbmeta flags without changing them. **Prepare AVB** optionally backs up the current vbmeta and boot images, then disables the current vbmeta verification/hashtree flags. It preserves other contents and Data encryption, performs full write readback, and attempts to restore the original bytes if the write fails.
 
-需要 bootloader 已解鎖。orange 是解鎖狀態；部分 firmware 不提供其他解鎖屬性，工具接受缺省值，但拒絕明確鎖定、未知或矛盾的狀態。
+An unlocked bootloader is required. **orange** indicates the unlocked state. Some firmware omits the other unlock properties; the tool accepts missing optional values but rejects explicit locked, unknown, or contradictory states.
 
-旗標修改會使原始 vbmeta 簽章不再匹配。選 Back up first 時，備份包含 `vbmeta-original.img`、`vbmeta-disabled.img`、`boot.img`、校驗值與還原說明。修改 boot／ROM 後，不應只還原原始 vbmeta 重新啟用驗證；回復 verified stock 應使用完整、匹配的原廠 firmware。
+Changing the flags makes the original vbmeta signature no longer match. With Back up first, the backup includes `vbmeta-original.img`, `vbmeta-disabled.img`, `boot.img`, checksums, and restore instructions. After changing boot/ROM contents, do not restore only the original vbmeta to re-enable verification. Return to verified stock using complete, matching stock firmware.
 
-AVB 驗證與 FBE 加密是不同功能。沒有必要為了解除 AVB 檢查先 Disable FBE 或清空 Data。
+AVB verification and FBE encryption are separate. There is no need to run Disable FBE or clear Data just to disable AVB checks.
 
 ## Magisk
 
-新版整合固定官方 30.7 APK，保留原始簽署位元組；獨立安裝 wrapper 限定 boot 目標，避免舊設定導向 recovery／vendor_boot。執行 Magisk 30.7 時選備份方式；要備份時先選可寫儲存空間，也可明確略過備份。完成後自行重開 Android，確認 Magisk 版本及 root 權限。
+The recovery bundles the official Magisk **30.7** APK with its signed bytes preserved. A separate installer wrapper targets boot only, preventing old settings from redirecting installation to recovery/vendor_boot. Choose the backup option when running Magisk 30.7. Select writable storage first if you want a backup, or explicitly skip the backup. Reboot Android manually afterward and confirm the Magisk version and root access.
 
-使用者已確認從 Magisk App 升級至 30.7 可用，並完成移除後從本版本 recovery 重新安裝 30.7 的測試。已安裝的 Magisk可繼續從 App 升級。
+The user confirmed an upgrade to 30.7 through the Magisk App and a recovery installation after removing the previous installation. Installed Magisk can continue to be upgraded through the App.
 
-安裝器失敗可能留下 Data 變更，還原 boot 不代表完整卸載。沒有 boot ramdisk 時，請使用 Magisk App 的映像修補方式。
+Installer failure can leave Data changes; restoring boot is not a complete uninstall. If the boot image has no supported ramdisk, use the Magisk App image-patching method.
 
 ## Android SELinux
 
-切換後需在 Android 確認實際狀態。recovery 的 SELinux 狀態不能代替 Android 結果；kernel、init 和模組也可能影響最終模式。原廠 user build 未必接受 permissive 參數。
+Check the actual state in Android after changing the setting. Recovery's SELinux state does not establish Android's state. The kernel, init, and modules can also affect the final mode. A stock user build may not accept permissive parameters.
 
-Restore Setting 使用相同備份儲存空間，撤回本工具的參數修改並保留其他當前 boot 變更。更新 kernel 後，工具會拒絕使用舊記錄。SELinux 修改與完整 boot 還原仍要求 AVB verification 已停用。
+**Restore Setting** uses the same backup storage to reverse this tool's parameter changes while retaining other current boot changes. After a kernel update, the tool rejects old records. SELinux changes and full boot restore still require AVB verification to be disabled.
 
 ## Install Image
 
-System／Vendor／Product／ODM Image 使用當前 ROM 的實際映射。完整 `super.img` 才選 Super；工具不自動調整分割區大小。重分割後需重新啟動 recovery，讓映射與容量重新建立。
+**System / Vendor / Product / ODM Image** use the actual mappings of the current ROM. Select **Super** only for a complete `super.img`; the tool does not automatically resize partitions. After repartitioning, restart recovery to recreate mappings and refresh capacities.
 
-新增入口依實際容量檢查 raw／Android sparse IMG；拒絕唯讀或仍掛載的目標、位於目標分割區上的來源、過大或不完整的映像。完成後同步並讀回核對指定資料；sparse DONT_CARE 區段保留原內容。原有 Boot／Recovery／Super 入口使用 TWRP 原本的處理方式。
+The added targets check raw/Android sparse images against the current capacity. They reject read-only or still-mounted targets, a source file on the target partition, oversized images, and incomplete images. After writing, they sync and read back the specified data. Sparse `DONT_CARE` regions retain their existing contents. The original Boot / Recovery / Super entries use TWRP's existing handling.
 
-Persist、Optics、Prism、EFS 和 Sec EFS 為實體分割區入口。EFS Image 寫入 `efs`；Sec EFS Image 寫入 `sec_efs`，與 Backup EFS 對應。Persist／EFS 請使用同一支手機的相應 raw 映像；一般 TWRP 檔案備份封裝不能直接當 IMG 刷入。
+**Persist, Optics, Prism, EFS, and Sec EFS** are physical partition targets. **EFS Image** writes `efs`; **Sec EFS Image** writes `sec_efs` and corresponds to Backup EFS. For Persist/EFS, use the matching raw image from the same phone. A normal TWRP file-backup archive cannot be flashed directly as an IMG.
 
-Advanced Wipe 隱藏 Metadata 選項，但保留其分割區與既有處理。採用 metadata encryption 的 ROM 可能在此保存加密相關資訊，不應任意清除。
+Advanced Wipe hides the Metadata option but retains the partition and its existing handling. ROMs using metadata encryption may store encryption information there; do not wipe it casually.
 
-## 已確認與待測
+## Confirmed behavior and remaining tests
 
-使用者已確認 recovery 穩定啟動、圖案／PIN／密碼解密、Odin 刷入、Android Enforcing／Permissive、Keep TWRP 重開機後保留，以及前版 Magisk 安裝。
+The user confirmed stable recovery boot, pattern/PIN/password decryption on the tested custom-ROM configurations, Odin installation, Android Enforcing/Permissive, Keep TWRP persistence after reboot, and earlier Magisk installation.
 
-Magisk 30.7 recovery 重新安裝已通過使用者實測。Restore Setting、Boot Restore、模組停用／還原、RW、EFS 備份與新增 Image 入口仍需逐項實測；此前通過的鎖屏解密元件在本版本保持相同位元組。
+Magisk 30.7 recovery reinstallation and the r2 optional-backup build have passed user device testing. Restore Setting, Boot Restore, module disable/restore, Mount RW, EFS backup, and the added image targets still need individual device tests. The previously tested lockscreen decryption components retain the same bytes in this release.
