@@ -38,6 +38,7 @@ odm                  /odm            ext4                   wait,avb,logical,fir
 /data             f2fs      /dev/block/bootdevice/by-name/userdata             flags=encryptable=footer,length=-16384;fileencryption=ice;
 /cache            ext4      /dev/block/bootdevice/by-name/cache
 /efs              ext4      /dev/block/bootdevice/by-name/efs                  flags=backup=1;display=EFS
+/sec_efs          ext4      /dev/block/bootdevice/by-name/sec_efs              flags=backup=1;display="Sec EFS"
 /persist          ext4      /dev/block/bootdevice/by-name/persist              flags=backup=0;display="Persist"
  
 #FOTA
