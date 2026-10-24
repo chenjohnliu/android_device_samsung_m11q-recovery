@@ -62,6 +62,38 @@ Check the actual state in Android after changing the setting. Recovery's SELinux
 
 **Restore Setting** uses the same backup storage to reverse this tool's parameter changes while retaining other current boot changes. After a kernel update, the tool rejects old records. SELinux changes and full boot restore still require AVB verification to be disabled.
 
+## Fastbootd
+
+The **quokka-fastboot1** source update starts the bundled Health 2.1 service and
+uses Samsung USB identification for fastboot. This fixes startup waiting for
+Health and allows the tested Windows host to use its existing Samsung Android
+Bootloader driver. An additional Google USB driver was not required in this test.
+
+From TWRP, use these commands on the connected computer to enter fastbootd and
+check the connection and current layout:
+
+```sh
+adb reboot fastboot
+fastboot devices
+fastboot getvar is-userspace
+fastboot getvar is-logical:system
+fastboot getvar partition-size:system
+fastboot getvar partition-size:product
+```
+
+`is-userspace` must report `yes`. The tested non-A/B layout uses `system` and
+`product` without `_a`/`_b` suffixes. Return to Recovery with:
+
+```sh
+fastboot reboot recovery
+```
+
+These commands only query partitions. Successful queries do not validate a GSI's
+compatibility, deletion, resizing or flashing. The Install Image targets still
+use the current partition capacity and do not resize automatically. Format Data
+does not enlarge System. See [fastboot1 build notes](RELEASE_NOTES-20261024-fastboot1.md)
+for exact tested images, source revisions and validation scope.
+
 ## Install Image
 
 **System / Vendor / Product / ODM Image** use the actual mappings of the current ROM. Select **Super** only for a complete `super.img`; the tool does not automatically resize partitions. After repartitioning, restart recovery to recreate mappings and refresh capacities.

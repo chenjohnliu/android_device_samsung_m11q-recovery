@@ -9,12 +9,22 @@ The 2026-10-04 r2 release preserves the exact user-tested recovery bytes. Downlo
 IMG or Odin AP TAR from [the r2 release](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/releases/tag/3.7.1_12-quokka-20261004-r2). GitHub provides asset digests. The TAR
 contains only recovery.img and is byte-identical to the standalone IMG.
 
+## Current source update: fastboot1 (2026-10-24)
+
+The current source starts the bundled Health HAL and uses Samsung fastboot USB
+identification. Recovery boot, fastbootd connection with the existing Samsung
+driver, logical partition size queries and return to Recovery passed device
+testing. Image flashing retains the existing capacity checks; automatic resizing
+and GSI Tools are not included. See [build notes](RELEASE_NOTES-20261024-fastboot1.md)
+and [fastboot instructions](ESSENTIALS.md#fastbootd). The public r2 release assets
+above are unchanged; this commit does not publish new image downloads.
+
 ## Build sources
 
 Use the device branch fbe-reconstruction and the exact companion revisions below:
 
-- `bootable/recovery`: [e01d37ca404e](https://github.com/chenjohnliu/android_bootable_recovery/commit/e01d37ca404e898ccf29bb67f84e6133bed16d7a) (`m11q-fbe-essentials`).
-- `device/samsung/m11q`: [b6c86986f8ab](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/commit/b6c86986f8ab8126cf0d23f91e02fee52a16dc89) (`fbe-reconstruction`).
+- `bootable/recovery`: [c31a88d333ab](https://github.com/chenjohnliu/android_bootable_recovery/commit/c31a88d333ab80aa25775c165f0e604d0b00aab5) (`m11q-fbe-essentials`).
+- `device/samsung/m11q`: [d9b5f49dfdc4](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/commit/d9b5f49dfdc4f37d9e48e95abe6effe01895cecc) (`fbe-reconstruction`).
 - `device/qcom/twrp-common`: [70ecbe3018bf](https://github.com/chenjohnliu/android_device_qcom_twrp-common/commit/70ecbe3018bf600de7d4cc452b66a543909d0673) (`m11q-32bit-services`).
 - `system/core`: [9919f11d0c00](https://github.com/chenjohnliu/android_system_core/commit/9919f11d0c00885006d2ca22ef034ae8eaf5bff0) (`m11q-fbe-diagnostics`).
 

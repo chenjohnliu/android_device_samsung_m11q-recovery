@@ -58,6 +58,34 @@ AVB 驗證與 FBE 加密是不同功能。沒有必要為了解除 AVB 檢查先
 
 Restore Setting 使用相同備份儲存空間，撤回本工具的參數修改並保留其他當前 boot 變更。更新 kernel 後，工具會拒絕使用舊記錄。SELinux 修改與完整 boot 還原仍要求 AVB verification 已停用。
 
+## Fastbootd
+
+**quokka-fastboot1** 原始碼更新會啟動內附的 Health 2.1 服務，並在 fastboot
+使用 Samsung USB 識別碼。這修正了等待 Health 而無法建立 USB 連線的問題；
+已測 Windows 電腦可沿用現有 Samsung Android Bootloader 驅動，不需另裝 Google 驅動。
+
+手機停在 TWRP 時，在電腦執行以下指令進入 fastbootd，並查詢連線及目前配置：
+
+```sh
+adb reboot fastboot
+fastboot devices
+fastboot getvar is-userspace
+fastboot getvar is-logical:system
+fastboot getvar partition-size:system
+fastboot getvar partition-size:product
+```
+
+`is-userspace` 必須回傳 `yes`。已測的非 A/B 配置使用 `system`、`product`，
+沒有 `_a`／`_b` 後綴。以下指令可返回 Recovery：
+
+```sh
+fastboot reboot recovery
+```
+
+這些指令只查詢分割區；查詢成功不代表已驗證 GSI 相容性或刪除、調整容量、刷入操作。
+Install Image 仍依目前容量檢查，不會自動擴充；Format Data 也不會擴大 System。
+實測映像、來源版本及驗證範圍見 [fastboot1 英文編譯紀錄](RELEASE_NOTES-20261024-fastboot1.md)。
+
 ## Install Image
 
 System／Vendor／Product／ODM Image 使用當前 ROM 的實際映射。完整 `super.img` 才選 Super；工具不自動調整分割區大小。重分割後需重新啟動 recovery，讓映射與容量重新建立。
