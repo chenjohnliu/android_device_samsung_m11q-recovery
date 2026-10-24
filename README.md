@@ -19,12 +19,17 @@ and GSI Tools are not included. See [build notes](RELEASE_NOTES-20261024-fastboo
 and [fastboot instructions](ESSENTIALS.md#fastbootd). The public r2 release assets
 above are unchanged; this commit does not publish new image downloads.
 
+The **strings1** resource update fills eleven missing English keys and adds a
+repeatable source/packed resource audit. Existing text and runtime C++ behavior
+are preserved. Packed validation passes; this resource image's device boot test
+is pending. See [strings1 build notes](RELEASE_NOTES-20261024-strings1.md).
+
 ## Build sources
 
 Use the device branch fbe-reconstruction and the exact companion revisions below:
 
-- `bootable/recovery`: [c31a88d333ab](https://github.com/chenjohnliu/android_bootable_recovery/commit/c31a88d333ab80aa25775c165f0e604d0b00aab5) (`m11q-fbe-essentials`).
-- `device/samsung/m11q`: [d9b5f49dfdc4](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/commit/d9b5f49dfdc4f37d9e48e95abe6effe01895cecc) (`fbe-reconstruction`).
+- `bootable/recovery`: [cc9238475f5e](https://github.com/chenjohnliu/android_bootable_recovery/commit/cc9238475f5e3a2afcb1fae497106228a6d1c9c9) (`m11q-fbe-essentials`).
+- `device/samsung/m11q`: [15f43e91b059](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/commit/15f43e91b059785d58306cbe570c2bef582c37ae) (`fbe-reconstruction`).
 - `device/qcom/twrp-common`: [70ecbe3018bf](https://github.com/chenjohnliu/android_device_qcom_twrp-common/commit/70ecbe3018bf600de7d4cc452b66a543909d0673) (`m11q-32bit-services`).
 - `system/core`: [9919f11d0c00](https://github.com/chenjohnliu/android_system_core/commit/9919f11d0c00885006d2ca22ef034ae8eaf5bff0) (`m11q-fbe-diagnostics`).
 

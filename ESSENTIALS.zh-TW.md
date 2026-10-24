@@ -34,6 +34,13 @@ bootloader 必須已解鎖；Prepare AVB 是獨立確認的操作。Magisk 安�
 
 在相容 ROM 切換加密設定，需要手動 Format Data，會清除內部儲存空間。Prepare AVB 保留 Data 加密、不格式化，也不會讓 stock ROM 解密變成可用。stock 的 Keep TWRP 流程不需要 Disable FBE 或 Format Data。
 
+刷入 GSI 本身不代表必須先停用 FBE。跨系統全新安裝時，依該 GSI 的指示清除
+舊資料；Format Data 與停用之後的加密是不同操作。最終 kernel／vendor／GSI
+組合支援時可保留 FBE。M11 的 `fileencryption=ice` 是廠商格式；TWRP 能解密，
+不代表每張 GSI 的 Android 使用者空間都相容。先依 GSI 的明確要求或開機日誌
+判斷，再決定是否切換加密設定。參考 [AOSP FBE](https://source.android.com/docs/security/features/encryption/file-based)
+及 [GSI 安裝說明](https://source.android.com/docs/core/tests/vts/gsi)。
+
 ## AVB / DM-Verity
 
 Status 唯讀顯示當前 vbmeta 驗證旗標。Prepare AVB 可選先備份當前 vbmeta 和 boot，再停用現有 vbmeta 的 verification／hashtree 旗標；保留其他內容和資料加密，寫入後完整讀回核對，失敗嘗試回復原內容。

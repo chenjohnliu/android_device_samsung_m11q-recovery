@@ -38,6 +38,16 @@ The bootloader must already be unlocked. Prepare AVB is a separate, explicitly c
 
 Switching the encryption configuration on a compatible ROM requires manual **Format Data**, which erases internal storage. Prepare AVB preserves Data encryption and does not format Data. It does not enable stock ROM decryption. The stock Keep TWRP workflow does not require Disable FBE or Format Data.
 
+Installing a GSI does not by itself require disabling FBE. For a clean switch
+between systems, follow the GSI's data-wipe instructions; formatting Data and
+disabling future encryption are different actions. Keep FBE if the final
+kernel/vendor/GSI combination supports it. The M11's `fileencryption=ice` format
+is vendor-specific: successful TWRP decryption does not prove that a particular
+GSI's Android userspace supports the same configuration. Follow that GSI's
+documented requirements or diagnose its boot logs before changing encryption.
+See [AOSP FBE](https://source.android.com/docs/security/features/encryption/file-based)
+and [GSI installation guidance](https://source.android.com/docs/core/tests/vts/gsi).
+
 ## AVB / DM-Verity
 
 **Status** reads the current vbmeta flags without changing them. **Prepare AVB** optionally backs up the current vbmeta and boot images, then disables the current vbmeta verification/hashtree flags. It preserves other contents and Data encryption, performs full write readback, and attempts to restore the original bytes if the write fails.
