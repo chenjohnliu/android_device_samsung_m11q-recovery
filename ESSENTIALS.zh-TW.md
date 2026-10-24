@@ -4,7 +4,7 @@
 
 適用 Samsung Galaxy M11（m11q）。從 Advanced → Essentials 進入。備份使用 Select Storage 選定的目的地，可使用 Micro SD 或 USB OTG；存放於 `TWRP/Essentials/<裝置序號>/<操作與時間>/`，附校驗資訊。寫入操作需滑動確認；工具不會自動重開機或格式化。
 
-20261004-r2 新增備份選擇，已通過使用者實機測試。Prepare AVB、Keep TWRP 和 Magisk 每次可選 **Back up first** 或 **Skip backup**；略過備份後仍需 **Swipe without Backup**。沒有可用儲存空間時可選 Skip backup，不需 SD／OTG。這只略過本工具的持久備份，不略過裝置、解鎖狀態、映像驗證或寫入核對。記憶體中的原始 boot／vbmeta 只能供當次失敗立即回復，重開後沒有已存副本；必要時須以匹配的原廠韌體恢復。Keep TWRP 仍將還原檔案改名保留於原分割區，不刪除。其他備份、匯出與還原功能仍使用所選儲存空間。
+[20261024 quokka r3](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/releases/tag/3.7.1_12-quokka-r3) 新增 GSI Tools、原生 Sec EFS 備份，並整理 Magisk 子選單。備份選擇沿用已實測的 r2。Prepare AVB、Keep TWRP 和 Magisk 每次可選 **Back up first** 或 **Skip backup**；略過備份後仍需 **Swipe without Backup**。沒有可用儲存空間時可選 Skip backup，不需 SD／OTG。這只略過本工具的持久備份，不略過裝置、解鎖狀態、映像驗證或寫入核對。記憶體中的原始 boot／vbmeta 只能供當次失敗立即回復，重開後沒有已存副本；必要時須以匹配的原廠韌體恢復。Keep TWRP 仍將還原檔案改名保留於原分割區，不刪除。其他備份、匯出與還原功能仍使用所選儲存空間。
 
 | 選單 | 功能 |
 | --- | --- |
@@ -13,9 +13,9 @@
 | Magisk 30.7 | 使用固定官方穩定版，可選先備份當前 boot，再安裝至有 ramdisk 的 boot。保留資料加密與 verity 設定。 |
 | Android SELinux | 調整 Android boot 的 Enforcing／Permissive 參數；Restore Setting 撤回本工具的參數修改。每次保留 boot 備份。 |
 | Mount RW | 在目前 recovery 工作階段掛載 system、vendor、product、odm 為可寫；確認實際結果，失敗不會假報成功。 |
-| Root Modules | 列出或停用單個／全部模組，保存原狀態。Choose Module 選 module.prop；Restore States 選 modules.state。需要 Data 已解密可寫；不支援的 root 注入方式會拒絕操作。 |
+| Magisk → Root Modules | 保留原本 Magisk 模組列出、單個／全部停用及狀態還原；需要 Data 已解密可寫。本版不新增 KernelSU／Next 支援。 |
 | Boot / AVB | 備份／還原 boot，並提供 AVB / DM-Verity 子選單。還原前檢查格式、校驗值和 ROM fingerprint，再備份當前 boot。 |
-| Backup EFS | 備份 sec_efs 原始映像。efs 是另一個分割區，此快捷工具不備份它。 |
+| GSI Tools | 查詢配置與剩餘空間、獨立確認刪除 Product，或依選取 GSI 的展開大小擴充 System。修改前保存並核對 Super 分割表，不會自動刷入 GSI。 |
 | Diagnostics | 匯出 recovery 版本、SELinux、crypto 服務、boot 參數、掛載及日誌。 |
 
 ## Stock ROM：保留 TWRP
@@ -93,13 +93,67 @@ fastboot reboot recovery
 Install Image 仍依目前容量檢查，不會自動擴充；Format Data 也不會擴大 System。
 實測映像、來源版本及驗證範圍見 [fastboot1 英文編譯紀錄](RELEASE_NOTES-20261024-fastboot1.md)。
 
+## GSI Tools
+
+[**quokka r3**](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/releases/tag/3.7.1_12-quokka-r3) 以此子選單取代 Essentials 的 EFS 捷徑。
+使用者已回報，以本版功能相同的本機前身完成 crDroid 基底上的 Andy GSI 刷入及開機；
+正式命名重編版尚未另外做手機開機測試。這不代表所有 ROM／GSI 組合皆相容。
+
+- **Partition Status**：讀取 slot 0 的分割區容量、群組上限與 Super 可配置空間。
+  群組上限也可能限制 System 擴充。
+- **Delete Product**：獨立滑動確認後，刪除 Product 邏輯分割區與映射並釋放空間。
+  可能讓目前 ROM 無法開機，請先保留完整 ROM 備份。
+- **Resize System**：選擇 raw 或 Android sparse `.img`，驗證後按展開大小擴充
+  System 配置並對齊邏輯區塊；不縮小、不刪 Product、不擴充檔案系統，也不寫入映像。
+  空間不足就停止。
+
+先選可寫備份儲存空間。實際修改前會保存並讀回核對
+`TWRP/Essentials/.../gsi-*/super-metadata.img`。這份檔案只有分割表，沒有
+System／Product 內容，不能當作完整 `super.img` 刷入。失敗時會嘗試立即復原
+分割表及映射；若之後刷 GSI 覆蓋已釋放空間，只還原分割表無法救回 Product 內容。
+
+限非 A/B m11q 的單一 Super 線性配置；不接受 snapshot、雙槽、多裝置、仍掛載或
+與分割表不符的目標映射。Vendor／ODM、boot、recovery、vbmeta 和 Data 不在修改
+範圍。準備完成後，再到 **Install Image → System Image** 刷入。
+容量配置成功不代表 GSI 相容，也不會修復 FBE／SELinux／APEX 開機問題。
+
+原生 **Backup → Sec EFS** 使用既有 `sec_efs` 檔案系統的標準 TWRP 備份／還原；
+**EFS** 是另一個分割區，兩者可各自勾選。既有檔案系統掛載設定保持原樣。
+還原請使用同一台手機的備份，不要將一般檔案備份封存檔直接當 IMG 刷入。
+
+## 已成功的 GSI 切換順序
+
+實測回報使用本機 crDroid 9.20（20261023）基底，以及 Andy 的
+`lineage-20.0-20240215-UNOFFICIAL-gsi_arm64_gN.img`。這是採用未加密 Data 的
+特定組合，不代表一般 ROM 使用或所有 GSI 都必須停用 FBE。
+
+1. 將個人資料與 Boot／Super 備份到 SD／OTG，保留可開機的完整 ROM ZIP。
+   基底 ROM 先正常進過 Android，再回到 TWRP；保留基底 kernel 與 SELinux 設定。
+2. 查看 AVB Status。成功基底的 vbmeta flags 已是 3，不需重複 Prepare AVB。
+3. 在相容 custom ROM 上執行 Essentials → Disable FBE，確認成功；失敗就停止。
+4. GSI Tools → Delete Product，再 Resize System 選擇解壓後 GSI。
+   上述映像展開大小為 3378458624 bytes；不要以壓縮檔大小作為容量。
+5. Install → Install Image → GSI → System Image，確認寫入與讀回驗證成功。
+6. Wipe → Format Data → yes，會清除內部儲存空間；停用 FBE 必須先成功。
+7. Reboot → Recovery，確認正常進入 TWRP，再 Reboot → System。
+
+這套順序不額外刷 permissive kernel。其他 ROM／GSI 組合仍需確認相容性。
+
+## Root Modules
+
+入口移到 **Essentials → Magisk → Root Modules**。保留原本的 Magisk 模組
+列出、單個／全部停用及狀態還原流程；本版不提供 KernelSU／Next 模組救援支援。
+需要 Data 已解密可寫；選擇 `module.prop` 停用單個模組，選 `modules.state`
+還原之前保存的狀態。與原版相同，偵測到不支援的 KernelSU initrc 注入時會拒絕。
+這些救援操作仍待手機實測。
+
 ## Install Image
 
 System／Vendor／Product／ODM Image 使用當前 ROM 的實際映射。完整 `super.img` 才選 Super；工具不自動調整分割區大小。重分割後需重新啟動 recovery，讓映射與容量重新建立。
 
 新增入口依實際容量檢查 raw／Android sparse IMG；拒絕唯讀或仍掛載的目標、位於目標分割區上的來源、過大或不完整的映像。完成後同步並讀回核對指定資料；sparse DONT_CARE 區段保留原內容。原有 Boot／Recovery／Super 入口使用 TWRP 原本的處理方式。
 
-Persist、Optics、Prism、EFS 和 Sec EFS 為實體分割區入口。EFS Image 寫入 `efs`；Sec EFS Image 寫入 `sec_efs`，與 Backup EFS 對應。Persist／EFS 請使用同一支手機的相應 raw 映像；一般 TWRP 檔案備份封裝不能直接當 IMG 刷入。
+Persist、Optics、Prism、EFS 和 Sec EFS 為實體分割區入口。EFS Image 寫入 `efs`；Sec EFS Image 寫入 `sec_efs`；原生 Backup 的 Sec EFS 以標準 TWRP 備份格式保存同一分割區。Persist／EFS 請使用同一支手機的相應 raw 映像；一般 TWRP 檔案備份封裝不能直接當 IMG 刷入。
 
 Advanced Wipe 隱藏 Metadata 選項，但保留其分割區與既有處理。採用 metadata encryption 的 ROM 可能在此保存加密相關資訊，不應任意清除。
 
@@ -107,4 +161,4 @@ Advanced Wipe 隱藏 Metadata 選項，但保留其分割區與既有處理。�
 
 使用者已確認 recovery 穩定啟動、圖案／PIN／密碼解密、Odin 刷入、Android Enforcing／Permissive、Keep TWRP 重開機後保留，以及前版 Magisk 安裝。
 
-Magisk 30.7 recovery 重新安裝已通過使用者實測。Restore Setting、Boot Restore、模組停用／還原、RW、EFS 備份與新增 Image 入口仍需逐項實測；此前通過的鎖屏解密元件在本版本保持相同位元組。
+Magisk 30.7 recovery 重新安裝已通過使用者實測。Restore Setting、Boot Restore、模組停用／還原、RW、EFS 備份與其他 Image 入口仍需逐項實測；此前通過的鎖屏解密元件在本版本保持相同位元組。

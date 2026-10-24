@@ -4,7 +4,7 @@ English | [Traditional Chinese](ESSENTIALS.zh-TW.md)
 
 For the Samsung Galaxy M11 (`m11q`). Open **Advanced > Essentials**. Backups use the destination chosen in **Select Storage**, such as Micro SD or USB OTG. They are saved under `TWRP/Essentials/<device-serial>/<operation-and-time>/` with verification information. Write operations require swipe confirmation. These tools do not automatically reboot or format the device.
 
-Release **20261004-r2** adds backup choices and has passed user device testing. **Prepare AVB**, **Keep TWRP**, and **Magisk** each offer **Back up first** or **Skip backup**. Skipping a backup still requires **Swipe without Backup**. If no writable storage is available, Skip backup works without SD or OTG.
+Release [**quokka r3 (20261024)**](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/releases/tag/3.7.1_12-quokka-r3) adds GSI Tools, native Sec EFS backup and the Magisk submenu. It retains the backup choices tested in r2. **Prepare AVB**, **Keep TWRP**, and **Magisk** each offer **Back up first** or **Skip backup**. Skipping a backup still requires **Swipe without Backup**. If no writable storage is available, Skip backup works without SD or OTG.
 
 Skip backup omits this tool's persistent backup. Device, bootloader, image, and write verification checks remain enabled. Original boot/vbmeta bytes held in memory can only support immediate rollback during the operation; there is no saved copy after reboot. Matching stock firmware may be needed for recovery. Keep TWRP retains the restore files by renaming them on their original partition rather than deleting them. Other backup, export, and restore tools still use the selected storage.
 
@@ -17,9 +17,9 @@ Skip backup omits this tool's persistent backup. Device, bootloader, image, and 
 | Magisk 30.7 | Uses the bundled official stable version. Optionally backs up the current boot image, then installs into boot with a supported ramdisk. Preserves data encryption and verity settings. |
 | Android SELinux | Changes Android boot parameters for Enforcing / Permissive. Restore Setting reverses the parameters changed by this tool. Each operation retains a boot backup. |
 | Mount RW | Mounts system, vendor, product, and odm as writable for the current recovery session. Checks the actual result and reports failures. |
-| Root Modules | Lists or disables one/all modules and saves their previous state. Choose Module selects `module.prop`; Restore States selects `modules.state`. Requires decrypted, writable Data. Unsupported root injection methods are rejected. |
+| Magisk > Root Modules | Retains existing Magisk module list, single/all disable and state restore. Requires decrypted writable Data. No KernelSU/Next support is added. |
 | Boot / AVB | Backs up/restores boot and provides the AVB / DM-Verity submenu. Before restoring, validates the format, checksum, and ROM fingerprint, then backs up the current boot image. |
-| Backup EFS | Backs up the raw `sec_efs` image. `efs` is a separate partition and is not included in this shortcut. |
+| GSI Tools | Reads allocation/free space, deletes Product with separate confirmation, or grows System to the expanded size of a selected raw/sparse GSI. Saves verified Super metadata before changes; never writes the GSI automatically. |
 | Diagnostics | Exports the recovery version, SELinux state, crypto services, boot parameters, mounts, and logs. |
 
 ## Stock ROM: keep TWRP after reboot
@@ -104,13 +104,78 @@ use the current partition capacity and do not resize automatically. Format Data
 does not enlarge System. See [fastboot1 build notes](RELEASE_NOTES-20261024-fastboot1.md)
 for exact tested images, source revisions and validation scope.
 
+## GSI Tools
+
+[**quokka r3**](https://github.com/chenjohnliu/android_device_samsung_m11q-recovery/releases/tag/3.7.1_12-quokka-r3) replaces the redundant Essentials EFS shortcut with this submenu.
+The user reports a successful Andy GSI switch and boot from a crDroid baseline
+using the local predecessor with the same runtime feature sources. The formally
+named rebuild has not been separately boot-tested; other ROM/GSI combinations
+are not established by that result.
+
+- **Partition Status** reads slot-zero partition allocations, group limits and
+  free allocatable Super space. Group limits can restrict growth independently.
+- **Delete Product** is a separate swipe-confirmed operation. It removes the
+  Product logical partition and mapping, releasing its allocation. This can
+  prevent the current ROM from booting. Back up the complete ROM first.
+- **Resize System** selects a raw or Android sparse `.img`, validates it, and
+  grows System allocation to its expanded size, rounded to the logical block
+  boundary. It never shrinks System, deletes Product, resizes the filesystem,
+  or writes image data. If space is insufficient, it stops.
+
+Choose writable backup storage first. Before each actual layout change, the
+tool saves and reads back `super-metadata.img` under `TWRP/Essentials/.../gsi-*`.
+This is **metadata only**, with no System/Product contents. It is not a complete
+`super.img` and must not be flashed through Install Image. The tool attempts
+immediate metadata/mapping rollback on failure. Once another image reuses freed
+extents, restoring old metadata cannot restore overwritten Product contents.
+
+Only the non-A/B m11q single-device linear layout is supported. Snapshot,
+slotted, multi-device, mounted or stale target mappings are rejected. Vendor,
+ODM, boot, recovery, vbmeta and Data are not changed. After preparation, use
+**Install Image > System Image** separately. Successful allocation does not
+establish GSI boot compatibility or fix FBE/SELinux/APEX problems.
+
+## Confirmed GSI switch sequence
+
+The reported working combination used local crDroid 9.20 (20261023) and Andy's
+`lineage-20.0-20240215-UNOFFICIAL-gsi_arm64_gN.img`. This specific workflow uses
+unencrypted Data; disabling FBE is not a universal requirement for normal ROM
+use or every GSI.
+
+1. Back up personal files and Boot/Super to SD/OTG; retain a working full ROM
+   ZIP. Boot the baseline into Android once, then return to TWRP. Keep its kernel
+   and SELinux setting.
+2. Check AVB Status. The successful baseline already had vbmeta flags 3; no
+   further Prepare AVB was needed in that state.
+3. Run Essentials > Disable FBE on the compatible custom ROM and confirm
+   success. Stop if it fails.
+4. Run GSI Tools > Delete Product, then Resize System using the decompressed
+   GSI. The example expands to 3378458624 bytes; never use compressed file size.
+5. Install > Install Image > GSI > System Image; confirm successful writing and
+   readback verification.
+6. Wipe > Format Data > yes. This erases internal storage. Disable FBE must have
+   succeeded before this final format.
+7. Reboot > Recovery, confirm TWRP starts, then Reboot > System.
+
+No separate permissive kernel is part of this sequence. Other ROM/GSI
+combinations still require compatibility validation.
+
+## Root Modules
+
+Open **Essentials > Magisk > Root Modules**. The existing Magisk module list,
+single/all disable and saved-state restore behavior is retained. KernelSU and
+KernelSU Next module rescue are not supported by this release. Data must be decrypted and
+writable. Select `module.prop` to disable one module, or `modules.state` to
+restore saved states. The existing rejection of unsupported KernelSU initrc
+injection remains. Device testing of module rescue is still pending.
+
 ## Install Image
 
 **System / Vendor / Product / ODM Image** use the actual mappings of the current ROM. Select **Super** only for a complete `super.img`; the tool does not automatically resize partitions. After repartitioning, restart recovery to recreate mappings and refresh capacities.
 
 The added targets check raw/Android sparse images against the current capacity. They reject read-only or still-mounted targets, a source file on the target partition, oversized images, and incomplete images. After writing, they sync and read back the specified data. Sparse `DONT_CARE` regions retain their existing contents. The original Boot / Recovery / Super entries use TWRP's existing handling.
 
-**Persist, Optics, Prism, EFS, and Sec EFS** are physical partition targets. **EFS Image** writes `efs`; **Sec EFS Image** writes `sec_efs` and corresponds to Backup EFS. For Persist/EFS, use the matching raw image from the same phone. A normal TWRP file-backup archive cannot be flashed directly as an IMG.
+**Persist, Optics, Prism, EFS, and Sec EFS** are physical partition targets. **EFS Image** writes `efs`; **Sec EFS Image** writes `sec_efs`. Native **Backup > Sec EFS** now backs up its existing filesystem through standard TWRP Backup/Restore; **EFS** remains a distinct backup. Existing filesystem mounts are preserved. For Persist/EFS, use the matching raw image from the same phone. A normal TWRP file-backup archive cannot be flashed directly as an IMG.
 
 Advanced Wipe hides the Metadata option but retains the partition and its existing handling. ROMs using metadata encryption may store encryption information there; do not wipe it casually.
 
@@ -118,4 +183,4 @@ Advanced Wipe hides the Metadata option but retains the partition and its existi
 
 The user confirmed stable recovery boot, pattern/PIN/password decryption on the tested custom-ROM configurations, Odin installation, Android Enforcing/Permissive, Keep TWRP persistence after reboot, and earlier Magisk installation.
 
-Magisk 30.7 recovery reinstallation and the r2 optional-backup build have passed user device testing. Restore Setting, Boot Restore, module disable/restore, Mount RW, EFS backup, and the added image targets still need individual device tests. The previously tested lockscreen decryption components retain the same bytes in this release.
+Magisk 30.7 recovery reinstallation and the r2 optional-backup build have passed user device testing. Restore Setting, Boot Restore, module disable/restore, Mount RW, EFS backup, and other image targets still need individual device tests. The previously tested lockscreen decryption components retain the same bytes in this release.
